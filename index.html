@@ -77,6 +77,14 @@
 								$("#mine").val("99");
 								reload();
 							}
+							else if(parseInt(m)<0)
+							{
+								alert("（ˊ・ω・ˋ）");
+								$("#length").val("16");
+								$("#width").val("30");
+								$("#mine").val("99");
+								reload();
+							}
 							var map = new Array();
 							$("#container").empty();
 							$("#left").text("剩餘地雷："+m);
@@ -197,7 +205,7 @@
 														map[i][j] = -2;
 													}
 												}
-												$("h1").text("YOU WIN!\(^o^)/");
+												$("h1").text("YOU WIN!\\(^o^)/");
 											}
 										}
 										function dfs(a, b)
