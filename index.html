@@ -139,7 +139,7 @@
 								function()
 								{
 									var tmp = $(this).text();
-									if(tmp == "　" && map[Math.floor(parseInt($(this).prop("name"))/w+1)][parseInt($(this).prop("name"))%w +1]!=-2)
+									if(tmp == "　" && map[Math.floor(parseInt($(this).prop("name"))/w+1)][parseInt($(this).prop("name"))%w +1]!=-2 && map[Math.floor(parseInt($(this).prop("name"))/w+1)][parseInt($(this).prop("name"))%w +1]!=-1)
 									{
 										$(this).text("！");
 										caught++;
