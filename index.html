@@ -69,6 +69,11 @@
 							var l = $("#length").val();
 							var w = $("#width").val();
 							var m = $("#mine").val();
+							if(parseInt(m)>parseInt(l)*parseInt(w))
+							{
+								alert("裡面滿出來了><");
+								reload();
+							}
 							var map = new Array();
 							$("#container").empty();
 							$("#left").text("剩餘地雷："+m);
