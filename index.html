@@ -1,357 +1,239 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-		<title>Minesweeper</title>
-		<link rel="stylesheet"href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-		<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-		<style>
-			#top
-			{
-				font-size:48px;
-				text-align: center;
-			}
-			div
-			{
-				text-align: center;
-			}
-			input
-			{
-				font-size:24px;
-			}
-			body
-			{
-				margin:auto;
-				font-size:24px;
-			}
-			.board
-			{
-				height:36px; 
-				width:36px;
-				font-size:24px;
-			}
-			#left
-			{
-				text-align:center;
-			}
-			h1
-			{
-				font-size:72px;
-				text-align:center;
-			}
-		</style>
-		<script>
-			$(
-				function()
-				{
-					$("#generate").on
-					("click",
-						function()
-						{
-							function disableMenu(e)
-							{
-								e = e || window.event;
-								if ( e.button == 2 ) {
-									if (e.cancelable)
-										e.preventDefault?e.preventDefault():e.returnValue=false;
-								}
-							}
-							if (window.addEventListener)
-								window.addEventListener("contextmenu", disableMenu);
-							else if (window.attachEvent)
-								document.attachEvent("oncontextmenu", disableMenu);
-							else
-								document.oncontextmenu=disableMenu;
-							var i, j;
-							var caught = 0;
-							var opened = 0;
-							var l = $("#length").val();
-							var w = $("#width").val();
-							var m = $("#mine").val();
-							if(parseInt(m)>parseInt(l)*parseInt(w))
-							{
-								alert("裡面滿出來了><");
-								$("#length").val("16");
-								$("#width").val("30");
-								$("#mine").val("99");
-								reload();
-							}
-							else if(parseInt(m)<0 || parseInt(l)<=0 || parseInt(w)<=0)
-							{
-								alert("（ˊ・ω・ˋ）");
-								$("#length").val("16");
-								$("#width").val("30");
-								$("#mine").val("99");
-								reload();
-							}
-							var map = new Array();
-							$("#container").empty();
-							$("#left").text("剩餘地雷："+m);
-							$("h1").text("");
-							for(i=0; i<=l+1; ++i)
-							{
-								map[i] = new Array();
-								for(j=0; j<=w+1; ++j)
-								{
-									map[i][j] = -2;
-								}
-							}
-							$("#container").append("</br>");
-							for(i=0; i<l; ++i)
-							{
-								for(j=0; j<w; ++j)
-								{
-									var b = $('<button class="board click" name="' + (i*parseInt(w)+j) + '">　</button>');
-									$("#container").append(b);
-									map[i+1][j+1] = 0;
-								}
-								$("#container").append("<br>");
-							}
-							for(i=0; i<m; ++i)
-							{
-								var now = Math.floor((Math.random() *(l*w+1))+1);
-								if((Math.floor((now-1)/parseInt(w))+1)==0 || Math.floor((now-1)/parseInt(w))+1==(parseInt(l)+1) || (now-1)%parseInt(w)+1==0 || (now-1)%parseInt(w)+1==(parseInt(w)+1)) i--;
-								else if(map[Math.floor((now-1)/parseInt(w))+1][(now-1)%parseInt(w)+1] != 9) map[Math.floor((now-1)/parseInt(w))+1][(now-1)%parseInt(w)+1] = 9;
-								else i--;
-							}
-							for(i=1; i<=l; ++i)
-							{
-								for(j=1; j<=w; ++j)
-								{
-									if(map[i][j]!=9)
-									{
-										var cnt=0;
-										if(map[i-1][j-1]==9) cnt++;
-										if(map[i-1][j]==9) cnt++;
-										if(map[i-1][j+1]==9) cnt++;
-										if(map[i][j-1]==9) cnt++;
-										if(map[i][j+1]==9) cnt++;
-										if(map[i+1][j-1]==9) cnt++;
-										if(map[i+1][j]==9) cnt++;
-										if(map[i+1][j+1]==9) cnt++;
-										map[i][j] = cnt;
-									}
-								}
-							}
-							$(".board").on
-							("contextmenu", 
-								function()
-								{
-									var tmp = $(this).text();
-									if(tmp == "　" && map[Math.floor(parseInt($(this).prop("name"))/w+1)][parseInt($(this).prop("name"))%w +1]!=-2 && map[Math.floor(parseInt($(this).prop("name"))/w+1)][parseInt($(this).prop("name"))%w +1]!=-1)
-									{
-										$(this).text("！");
-										caught++;
-										$("#left").text("剩餘地雷："+(m-caught)); 
-									}
-									else if(tmp == "！")
-									{
-										$(this).text("　");
-										caught--;
-										$("#left").text("剩餘地雷："+(m-caught)); 
-									}
-								}
-							)
-							$(".click").on
-							("click", 
-								function()
-								{
-									var tmp = $(this).text();
-									if(tmp == "　" && map[Math.floor(parseInt($(this).prop("name"))/w+1)][parseInt($(this).prop("name"))%w +1]!=-2)
-									{
-										$('[name="' + ((Math.floor(parseInt($(this).prop("name"))/w+1)-1)*parseInt(w)+(parseInt($(this).prop("name"))%w +1-1)) + '"]').css({"background-color":"gray", "color":"white"});
-										var tmp = this;
-										if(map[Math.floor(parseInt($(this).prop("name"))/w+1)][parseInt($(this).prop("name"))%w +1]==9)
-										{
-											$(this).text("＊");
-											$("h1").text("YOU LOSE!（σ°∀°）σ");
-											for(i=1; i<=l; ++i)
-											{
-												for(j=1; j<=w; ++j)
-												{
-													if(map[i][j]==9)
-													{
-														$('[name="' + ((i-1)*parseInt(w)+(j-1)) + '"]').text("＊");
-														$('[name="' + ((i-1)*parseInt(w)+(j-1)) + '"]').css("background-color", "gray");
-													}
-												}
-											}
-											for(i=0; i<=l+1; ++i)
-											{
-												for(j=0; j<=w+1; ++j)
-												{
-													map[i][j] = -2;
-												}
-											}
-										}
-										else
-										{
-											if(map[Math.floor(parseInt($(this).prop("name"))/w+1)][parseInt($(this).prop("name"))%w +1]!=0 && map[Math.floor(parseInt($(this).prop("name"))/w+1)][parseInt($(this).prop("name"))%w +1]!=-1)
-											{
-												$(this).text(map[Math.floor(parseInt($(this).prop("name"))/w+1)][parseInt($(this).prop("name"))%w +1]);
-												opened++;
-											}
-											else
-											{
-												dfs((Math.floor(parseInt($(this).prop("name"))/w+1)), (parseInt($(this).prop("name"))%w+1));
-											}
-											if(opened==(parseInt(l)*parseInt(w)-parseInt(m)))
-											{
-												for(i=0; i<=l+1; ++i)
-												{
-													for(j=0; j<=w+1; ++j)
-													{
-														map[i][j] = -2;
-													}
-												}
-												$("h1").text("YOU WIN!\\(^o^)/");
-											}
-										}
-										function dfs(a, b)
-										{
-											opened++;
-											map[a][b] = -1;
-											$('[name="' + ((a-1)*parseInt(w)+(b-1)) + '"]').css("background-color", "gray");
-											if(map[a-1][b-1]!=9 && map[a-1][b-1]!=0 && map[a-1][b-1]!=-1)
-											{
-												var c, d;
-												c = a-1;
-												d = b-1;
-												if(c>0 && c<=l && d>0 && d<=w)
-												{
-													var txt = $('[name="' + ((c-1)*parseInt(w)+(d-1)) + '"]').text();
-													if(txt=="　")opened++;
-													$('[name="' + ((c-1)*parseInt(w)+(d-1)) + '"]').css({"background-color":"gray", "color":"white"});
-													$('[name="' + ((c-1)*parseInt(w)+(d-1)) + '"]').text(map[c][d]);
-												}
-											}
-											if(map[a-1][b]!=9 && map[a-1][b]!=0 && map[a-1][b]!=-1)
-											{
-												var c, d;
-												c = a-1;
-												d = b;
-												if(c>0 && c<=l && d>0 && d<=w)
-												{
-													var txt = $('[name="' + ((c-1)*parseInt(w)+(d-1)) + '"]').text();
-													if(txt=="　")opened++;
-													$('[name="' + ((c-1)*parseInt(w)+(d-1)) + '"]').css({"background-color":"gray", "color":"white"});
-													$('[name="' + ((c-1)*parseInt(w)+(d-1)) + '"]').text(map[c][d]);
-												}
-											}
-											if(map[a-1][b+1]!=9 && map[a-1][b+1]!=0 && map[a-1][b+1]!=-1)
-											{
-												var c, d;
-												c = a-1;
-												d = b+1;
-												if(c>0 && c<=l && d>0 && d<=w)
-												{
-													var txt = $('[name="' + ((c-1)*parseInt(w)+(d-1)) + '"]').text();
-													if(txt=="　")opened++;
-													$('[name="' + ((c-1)*parseInt(w)+(d-1)) + '"]').css({"background-color":"gray", "color":"white"});
-													$('[name="' + ((c-1)*parseInt(w)+(d-1)) + '"]').text(map[c][d]);
-												}
-											}
-											if(map[a][b-1]!=9 && map[a][b-1]!=0 && map[a][b-1]!=-1)
-											{
-												var c, d;
-												c = a;
-												d = b-1;
-												if(c>0 && c<=l && d>0 && d<=w)
-												{
-													var txt = $('[name="' + ((c-1)*parseInt(w)+(d-1)) + '"]').text();
-													if(txt=="　")opened++;
-													$('[name="' + ((c-1)*parseInt(w)+(d-1)) + '"]').css({"background-color":"gray", "color":"white"});
-													$('[name="' + ((c-1)*parseInt(w)+(d-1)) + '"]').text(map[c][d]);
-												}
-											}
-											if(map[a][b+1]!=9 && map[a][b+1]!=0 && map[a][b+1]!=-1)
-											{
-												var c, d;
-												c = a;
-												d = b+1;
-												if(c>0 && c<=l && d>0 && d<=w)
-												{
-													var txt = $('[name="' + ((c-1)*parseInt(w)+(d-1)) + '"]').text();
-													if(txt=="　")opened++;
-													$('[name="' + ((c-1)*parseInt(w)+(d-1)) + '"]').css({"background-color":"gray", "color":"white"});
-													$('[name="' + ((c-1)*parseInt(w)+(d-1)) + '"]').text(map[c][d]);
-												}
-											}
-											if(map[a+1][b-1]!=9 && map[a+1][b-1]!=0 && map[a+1][b-1]!=-1)
-											{
-												var c, d;
-												c = a+1;
-												d = b-1;
-												if(c>0 && c<=l && d>0 && d<=w)
-												{
-													var txt = $('[name="' + ((c-1)*parseInt(w)+(d-1)) + '"]').text();
-													if(txt=="　")opened++;
-													$('[name="' + ((c-1)*parseInt(w)+(d-1)) + '"]').css({"background-color":"gray", "color":"white"});
-													$('[name="' + ((c-1)*parseInt(w)+(d-1)) + '"]').text(map[c][d]);
-												}
-											}
-											if(map[a+1][b]!=9 && map[a+1][b]!=0 && map[a+1][b]!=-1)
-											{
-												var c, d;
-												c = a+1;
-												d = b;
-												if(c>0 && c<=l && d>0 && d<=w)
-												{
-													var txt = $('[name="' + ((c-1)*parseInt(w)+(d-1)) + '"]').text();
-													if(txt=="　")opened++;
-													$('[name="' + ((c-1)*parseInt(w)+(d-1)) + '"]').css({"background-color":"gray", "color":"white"});
-													$('[name="' + ((c-1)*parseInt(w)+(d-1)) + '"]').text(map[c][d]);
-												}
-											}
-											if(map[a+1][b+1]!=9 && map[a+1][b+1]!=0 && map[a+1][b+1]!=-1)
-											{
-												var c, d;
-												c = a+1;
-												d = b+1;
-												if(c>0 && c<=l && d>0 && d<=w)
-												{
-													var txt = $('[name="' + ((c-1)*parseInt(w)+(d-1)) + '"]').text();
-													if(txt=="　")opened++;
-													$('[name="' + ((c-1)*parseInt(w)+(d-1)) + '"]').css({"background-color":"gray", "color":"white"});
-													$('[name="' + ((c-1)*parseInt(w)+(d-1)) + '"]').text(map[c][d]);
-												}
-											}
-											if(map[a-1][b-1]==0) dfs(a-1, b-1);
-											if(map[a-1][b]==0) dfs(a-1, b);
-											if(map[a-1][b+1]==0) dfs(a-1, b+1);
-											if(map[a][b-1]==0) dfs(a, b-1);
-											if(map[a][b+1]==0) dfs(a, b+1);
-											if(map[a+1][b-1]==0) dfs(a+1, b-1);
-											if(map[a+1][b]==0) dfs(a+1, b);
-											if(map[a+1][b+1]==0) dfs(a+1, b+1);
-											return;
-										}
-									}
-								}
-							);
-						}
-					);
-				}
-			);
-		</script>
-	</head>
-	<body>
-		<p id = "top">Minesweeper</p>
-		</br>
-		<div>
-			請輸入長：
-			<input id = "length" value = "16"></input>
-			請輸入寬：
-			<input id = "width" value = "30"></input>
-			請輸入地雷數：
-			<input id = "mine" value = "99"></input>
-			<button id = "generate">Generate</button>
-		</div>
-		<div id = "container">
-		</div>
-		</br>
-		<p id="left"></p>
-		<h1></h1>
-	</body>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>Minesweeper</title>
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+  <style>
+  #top {
+    font-size: 48px;
+    text-align: center;
+  }
+
+  div {
+    text-align: center;
+  }
+
+  input {
+    font-size: 24px;
+  }
+
+  body {
+    margin: auto;
+    font-size: 24px;
+  }
+
+  .board {
+    height: 36px;
+    width: 36px;
+    font-size: 24px;
+  }
+
+  #left {
+    text-align: center;
+  }
+
+  h1 {
+    font-size: 72px;
+    text-align: center;
+  }
+  </style>
+  <script>
+  $(
+    function() {
+      $("#generate").on("click",
+        function() {
+          function dfs(a, b) {
+            opened++;
+            map[a][b] = -1;
+            $('[name="' + ((a - 1) * parseInt(w) + (b - 1)) + '"]').css("background-color", "gray");
+            for (var o = -1; o <= 1; ++o) {
+              for (var p = -1; p <= 1; ++p) {
+                if (o != 0 || p != 0) {
+                  if (map[a + o][b + p] != 9 && map[a + o][b + p] != 0 && map[a + o][b + p] != -1) {
+                    var c, d;
+                    c = a + o;
+                    d = b + p;
+                    if (c > 0 && c <= l && d > 0 && d <= w) {
+                      var txt = $('[name="' + ((c - 1) * parseInt(w) + (d - 1)) + '"]').text();
+                      if (txt == "　") opened++;
+                      $('[name="' + ((c - 1) * parseInt(w) + (d - 1)) + '"]').css({
+                        "background-color": "gray",
+                        "color": "white"
+                      });
+                      $('[name="' + ((c - 1) * parseInt(w) + (d - 1)) + '"]').text(map[c][d]);
+                    }
+                  }
+                }
+              }
+            }
+            for (var o = -1; o <= 1; ++o) {
+              for (var p = -1; p <= 1; ++p) {
+                if (o != 0 || p != 0) {
+                  if (map[a + o][b + p] == 0) dfs(a + o, b + p);
+                }
+              }
+            }
+            return;
+          }
+
+          function disableMenu(e) {
+            e = e || window.event;
+            if (e.button == 2) {
+              if (e.cancelable)
+                e.preventDefault ? e.preventDefault() : e.returnValue = false;
+            }
+          }
+          if (window.addEventListener)
+            window.addEventListener("contextmenu", disableMenu);
+          else if (window.attachEvent)
+            document.attachEvent("oncontextmenu", disableMenu);
+          else
+            document.oncontextmenu = disableMenu;
+          var i, j;
+          var caught = 0;
+          var opened = 0;
+          var l = $("#length").val();
+          var w = $("#width").val();
+          var m = $("#mine").val();
+          if (parseInt(m) > parseInt(l) * parseInt(w)) {
+            alert("裡面滿出來了><");
+            $("#length").val("16");
+            $("#width").val("30");
+            $("#mine").val("99");
+            reload();
+          } else if(parseInt(m)<0 || parseInt(l)<=0 || parseInt(w)<=0) {
+            alert("（ˊ・ω・ˋ）");
+            $("#length").val("16");
+            $("#width").val("30");
+            $("#mine").val("99");
+            reload();
+          }
+          var map = new Array();
+          $("#container").empty();
+          $("#left").text("剩餘地雷：" + m);
+          $("h1").text("");
+          for (i = 0; i <= l + 1; ++i) {
+            map[i] = new Array();
+            for (j = 0; j <= w + 1; ++j) {
+              map[i][j] = -2;
+            }
+          }
+          $("#container").append("</br>");
+          for (i = 0; i < l; ++i) {
+            for (j = 0; j < w; ++j) {
+              var b = $('<button class="board click" name="' + (i * parseInt(w) + j) + '">　</button>');
+              $("#container").append(b);
+              map[i + 1][j + 1] = 0;
+            }
+            $("#container").append("<br>");
+          }
+          for (i = 0; i < m; ++i) {
+            var now = Math.floor((Math.random() * (l * w + 1)) + 1);
+            if ((Math.floor((now - 1) / parseInt(w)) + 1) == 0 || Math.floor((now - 1) / parseInt(w)) + 1 == (parseInt(l) + 1) || (now - 1) % parseInt(w) + 1 == 0 || (now - 1) % parseInt(w) + 1 == (parseInt(w) + 1)) i--;
+            else if (map[Math.floor((now - 1) / parseInt(w)) + 1][(now - 1) % parseInt(w) + 1] != 9) map[Math.floor((now - 1) / parseInt(w)) + 1][(now - 1) % parseInt(w) + 1] = 9;
+            else i--;
+          }
+          for (i = 1; i <= l; ++i) {
+            for (j = 1; j <= w; ++j) {
+              if (map[i][j] != 9) {
+                var cnt = 0;
+                for (var o = -1; o <= 1; ++o) {
+                  for (var p = -1; p <= 1; ++p) {
+                    if (o != 0 || p != 0) {
+                      if (map[i + o][j + p] == 9) cnt++;
+                    }
+                  }
+                }
+                map[i][j] = cnt;
+              }
+            }
+          }
+          $(".board").on("contextmenu",
+            function() {
+              var tmp = $(this).text();
+              if (tmp == "　" && map[Math.floor(parseInt($(this).prop("name")) / w + 1)][parseInt($(this).prop("name")) % w + 1] != -2) {
+                $(this).text("！");
+                caught++;
+                $("#left").text("剩餘地雷：" + (m - caught));
+              } else if (tmp == "！") {
+                $(this).text("　");
+                caught--;
+                $("#left").text("剩餘地雷：" + (m - caught));
+              }
+            }
+          )
+          $(".click").on("click",
+            function() {
+              var tmp = $(this).text();
+              if (tmp == "　" && map[Math.floor(parseInt($(this).prop("name")) / w + 1)][parseInt($(this).prop("name")) % w + 1] != -2) {
+                $('[name="' + ((Math.floor(parseInt($(this).prop("name")) / w + 1) - 1) * parseInt(w) + (parseInt($(this).prop("name")) % w + 1 - 1)) + '"]').css({
+                  "background-color": "gray",
+                  "color": "white"
+                });
+                var tmp = this;
+                if (map[Math.floor(parseInt($(this).prop("name")) / w + 1)][parseInt($(this).prop("name")) % w + 1] == 9) {
+                  $(this).text("＊");
+                  $("h1").text("YOU LOSE!（σ°∀°）σ");
+                  for (i = 1; i <= l; ++i) {
+                    for (j = 1; j <= w; ++j) {
+                      if (map[i][j] == 9) {
+                        $('[name="' + ((i - 1) * parseInt(w) + (j - 1)) + '"]').text("＊");
+                        $('[name="' + ((i - 1) * parseInt(w) + (j - 1)) + '"]').css("background-color", "gray");
+                      }
+                    }
+                  }
+                  for (i = 0; i <= l + 1; ++i) {
+                    for (j = 0; j <= w + 1; ++j) {
+                      map[i][j] = -2;
+                    }
+                  }
+                } else {
+                  if (map[Math.floor(parseInt($(this).prop("name")) / w + 1)][parseInt($(this).prop("name")) % w + 1] != 0 && map[Math.floor(parseInt($(this).prop("name")) / w + 1)][parseInt($(this).prop("name")) % w + 1] != -1) {
+                    $(this).text(map[Math.floor(parseInt($(this).prop("name")) / w + 1)][parseInt($(this).prop("name")) % w + 1]);
+                    opened++;
+                  } else {
+                    dfs((Math.floor(parseInt($(this).prop("name")) / w + 1)), (parseInt($(this).prop("name")) % w + 1));
+                  }
+                  if (opened == (parseInt(l) * parseInt(w) - parseInt(m))) {
+                    for (i = 0; i <= l + 1; ++i) {
+                      for (j = 0; j <= w + 1; ++j) {
+                        map[i][j] = -2;
+                      }
+                    }
+                    $("h1").text("YOU WIN!\\(^o^)/");
+                  }
+                }
+
+              }
+            }
+          );
+        }
+      );
+    }
+  );
+  </script>
+</head>
+
+<body>
+  <p id="top">Minesweeper</p>
+  </br>
+  <div>
+    請輸入長：
+    <input id="length" value="16"></input>
+    請輸入寬：
+    <input id="width" value="30"></input>
+    請輸入地雷數：
+    <input id="mine" value="99"></input>
+    <button id="generate">Generate</button>
+  </div>
+  <div id="container">
+  </div>
+  </br>
+  <p id="left"></p>
+  <h1></h1>
+</body>
 </html>
