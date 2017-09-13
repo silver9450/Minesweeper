@@ -148,10 +148,10 @@
           $(".board").on("contextmenu", // toggle flag on right click
             function() {
               var tmp = $(this).text();
-              if (tmp == "　" && map[Math.floor(parseInt($(this).prop("name")) / w)][parseInt($(this).prop("name")) % w] != -2) {
+              if (tmp == "　" && map[Math.floor(parseInt($(this).prop("name")) / w)][parseInt($(this).prop("name")) % w] != -1) {
                 $(this).text("！");
                 caught++;
-              } else if (tmp == "！" && map[Math.floor(parseInt($(this).prop("name")) / w)][parseInt($(this).prop("name")) % w] != -2) {
+              } else if (tmp == "！" && map[Math.floor(parseInt($(this).prop("name")) / w)][parseInt($(this).prop("name")) % w] != -1) {
                 $(this).text("　");
                 caught--;
               }
@@ -175,7 +175,7 @@
                       if (map[i][j] == 9) {
                         $('[name="' + (i * parseInt(w) + j) + '"]').text("＊");
                         $('[name="' + (i * parseInt(w) + j) + '"]').css("background-color", "gray");
-						$('[name="' + (i * parseInt(w) + j) + '"]').css("color", "black");
+				        $('[name="' + (i * parseInt(w) + j) + '"]').css("color", "black");
                       }
                     }
                   }
