@@ -148,10 +148,10 @@
           $(".board").on("contextmenu", // toggle flag on right click
             function() {
               var tmp = $(this).text();
-              if (tmp == "　" && map[Math.floor(parseInt($(this).prop("name")) / w)][parseInt($(this).prop("name")) % w] != -1) {
+              if (tmp == "　" && map[Math.floor(parseInt($(this).prop("name")) / w)][parseInt($(this).prop("name")) % w] != -1 && map[Math.floor(parseInt($(this).prop("name")) / w)][parseInt($(this).prop("name")) % w] != -2) {
                 $(this).text("！");
                 caught++;
-              } else if (tmp == "！" && map[Math.floor(parseInt($(this).prop("name")) / w)][parseInt($(this).prop("name")) % w] != -1) {
+              } else if (tmp == "！" && map[Math.floor(parseInt($(this).prop("name")) / w)][parseInt($(this).prop("name")) % w] != -1 && map[Math.floor(parseInt($(this).prop("name")) / w)][parseInt($(this).prop("name")) % w] != -2) {
                 $(this).text("　");
                 caught--;
               }
