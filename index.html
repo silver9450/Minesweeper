@@ -100,7 +100,7 @@
           var w = $("#width").val();
           var m = $("#mine").val();
           if (parseInt(m) > parseInt(l) * parseInt(w)) {
-            alert("裡面滿出來了><");
+            alert("That's too much ><");
             $("#length").val("16");
             $("#width").val("30");
             $("#mine").val("99");
@@ -114,7 +114,7 @@
           }
           var map = new Array();
           $("#container").empty();
-          $("#left").text("剩餘地雷：" + m);
+          $("#left").text("Mines remaining: " + m);
           $("h1").text("");
           for (i = 0; i <= l + 1; ++i) {
             map[i] = new Array();
@@ -158,11 +158,11 @@
               if (tmp == "　" && map[Math.floor(parseInt($(this).prop("name")) / w + 1)][parseInt($(this).prop("name")) % w + 1] != -2) {
                 $(this).text("！");
                 caught++;
-                $("#left").text("剩餘地雷：" + (m - caught));
+                $("#left").text("Mines remaining: " + (m - caught));
               } else if (tmp == "！") {
                 $(this).text("　");
                 caught--;
-                $("#left").text("剩餘地雷：" + (m - caught));
+                $("#left").text("Mines remaining: " + (m - caught));
               }
             }
           )
@@ -222,11 +222,11 @@
   <p id="top">Minesweeper</p>
   </br>
   <div>
-    請輸入長：
+    Height：
     <input id="length" value="16"></input>
-    請輸入寬：
+    Width：
     <input id="width" value="30"></input>
-    請輸入地雷數：
+    Number of Mines：
     <input id="mine" value="99"></input>
     <button id="generate">Generate</button>
   </div>
