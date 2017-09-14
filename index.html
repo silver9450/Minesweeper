@@ -12,30 +12,27 @@
     font-size: 48px;
     text-align: center;
   }
-
   div {
     text-align: center;
   }
-
   input {
     font-size: 24px;
   }
-
   body {
     margin: auto;
     font-size: 24px;
   }
-
   .board {
     height: 36px;
     width: 36px;
     font-size: 24px;
   }
-
+  #time {
+    text-align: center;
+  }
   #left {
     text-align: center;
   }
-
   h1 {
     font-size: 72px;
     text-align: center;
@@ -43,43 +40,61 @@
   </style>
   <script>
   $(
-    function() {
+    function() { // 9 for mine, -2 for unclickable, -1 for opened, others for number of adjacent mines.
+	  var first_click = true;
+	  var start_time = -1;
+	  var end_time = -1;
+	  var set_time;
+	  function start_timer() { 
+	    set_time = setInterval(
+		  function() {
+			  end_time = new Date().getTime();
+			  $("#time").text("Time Spent: " + Math.floor((end_time - start_time) / 1000) + " s");
+		  }, 1000);
+	  }
+	  function stop_timer() {
+	    clearInterval(set_time);
+		first_click = true;
+	    start_time = -1;
+	    end_time = -1;
+	  }
       $("#generate").on("click",
         function() {
           function dfs(a, b) {
-            opened++;
+            if(map[a][b] == -1) return; // opened
+			opened++;
             map[a][b] = -1;
-            $('[name="' + ((a - 1) * parseInt(w) + (b - 1)) + '"]').css("background-color", "gray");
+            $('[name="' + (a * parseInt(w) + b) + '"]').css("background-color", "gray");
             for (var o = -1; o <= 1; ++o) {
               for (var p = -1; p <= 1; ++p) {
-                if (o != 0 || p != 0) {
-                  if (map[a + o][b + p] != 9 && map[a + o][b + p] != 0 && map[a + o][b + p] != -1) {
+                if (o == 0 && p == 0) continue;
+				else if(0 <= a + o && a + o < l && 0 <= b + p && b + p < w) { // in range
+                  if (map[a + o][b + p] != 9 && map[a + o][b + p] != 0 && map[a + o][b + p] != -1) { // unopened number
                     var c, d;
                     c = a + o;
                     d = b + p;
-                    if (c > 0 && c <= l && d > 0 && d <= w) {
-                      var txt = $('[name="' + ((c - 1) * parseInt(w) + (d - 1)) + '"]').text();
-                      if (txt == "　") opened++;
-                      $('[name="' + ((c - 1) * parseInt(w) + (d - 1)) + '"]').css({
+                    var txt = $('[name="' + (c * parseInt(w) + d) + '"]').text();
+                    if (txt == "　") {
+					  opened++;
+                      $('[name="' + (c * parseInt(w) + d) + '"]').css({
                         "background-color": "gray",
                         "color": "white"
                       });
-                      $('[name="' + ((c - 1) * parseInt(w) + (d - 1)) + '"]').text(map[c][d]);
-                    }
+                      $('[name="' + (c * parseInt(w) + d) + '"]').text(map[c][d]);
+					  map[c][d] = -1;
+					}
                   }
                 }
               }
             }
             for (var o = -1; o <= 1; ++o) {
               for (var p = -1; p <= 1; ++p) {
-                if (o != 0 || p != 0) {
-                  if (map[a + o][b + p] == 0) dfs(a + o, b + p);
-                }
+                if (o == 0 && p == 0) continue;
+				else if(0 <= a + o && a + o < l && 0 <= b + p && b + p < w && map[a + o][b + p] == 0) dfs(a + o, b + p);
               }
             }
             return;
           }
-
           function disableMenu(e) {
             e = e || window.event;
             if (e.button == 2) {
@@ -96,6 +111,7 @@
           var i, j;
           var caught = 0;
           var opened = 0;
+	      stop_timer();
           var l = $("#length").val();
           var w = $("#width").val();
           var m = $("#mine").val();
@@ -114,100 +130,106 @@
           }
           var map = new Array();
           $("#container").empty();
-          $("#left").text("Mines remaining: " + m);
+	      start = true;
+		  $("#left").text("Mines remaining: " + m);
           $("h1").text("");
-          for (i = 0; i <= l + 1; ++i) {
+          for (i = 0; i < l; ++i) { // initialize map
             map[i] = new Array();
-            for (j = 0; j <= w + 1; ++j) {
-              map[i][j] = -2;
+            for (j = 0; j < w; ++j) {
+              map[i][j] = 0;
             }
           }
-          $("#container").append("</br>");
-          for (i = 0; i < l; ++i) {
+		  $("#time").text("Time Spent: 0 s");
+          for (i = 0; i < l; ++i) { // generate board
             for (j = 0; j < w; ++j) {
               var b = $('<button class="board click" name="' + (i * parseInt(w) + j) + '">　</button>');
               $("#container").append(b);
-              map[i + 1][j + 1] = 0;
             }
             $("#container").append("<br>");
           }
-          for (i = 0; i < m; ++i) {
-            var now = Math.floor((Math.random() * (l * w + 1)) + 1);
-            if ((Math.floor((now - 1) / parseInt(w)) + 1) == 0 || Math.floor((now - 1) / parseInt(w)) + 1 == (parseInt(l) + 1) || (now - 1) % parseInt(w) + 1 == 0 || (now - 1) % parseInt(w) + 1 == (parseInt(w) + 1)) i--;
-            else if (map[Math.floor((now - 1) / parseInt(w)) + 1][(now - 1) % parseInt(w) + 1] != 9) map[Math.floor((now - 1) / parseInt(w)) + 1][(now - 1) % parseInt(w) + 1] = 9;
+          for (i = 0; i < m; ++i) { // random mines
+            var now = Math.floor(Math.random() * l * w);
+            if (map[Math.floor(now / parseInt(w))][now % parseInt(w)] != 9) map[Math.floor(now / parseInt(w))][now % parseInt(w)] = 9;
             else i--;
           }
-          for (i = 1; i <= l; ++i) {
-            for (j = 1; j <= w; ++j) {
+          for (i = 0; i < l; ++i) { // set map
+            for (j = 0; j < w; ++j) {
               if (map[i][j] != 9) {
                 var cnt = 0;
                 for (var o = -1; o <= 1; ++o) {
                   for (var p = -1; p <= 1; ++p) {
-                    if (o != 0 || p != 0) {
-                      if (map[i + o][j + p] == 9) cnt++;
-                    }
+                    if(p == 0 && o == 0) continue;
+					else if (0 <= i + o && i + o < l && 0 <= j + p && j + p < w && map[i + o][j + p] == 9) cnt++;
                   }
                 }
                 map[i][j] = cnt;
               }
             }
           }
-          $(".board").on("contextmenu",
+          $(".board").on("contextmenu", // toggle flag on right click
             function() {
               var tmp = $(this).text();
-              if (tmp == "　" && map[Math.floor(parseInt($(this).prop("name")) / w + 1)][parseInt($(this).prop("name")) % w + 1] != -2) {
+              if (tmp == "　" && map[Math.floor(parseInt($(this).prop("name")) / w)][parseInt($(this).prop("name")) % w] != -1 && map[Math.floor(parseInt($(this).prop("name")) / w)][parseInt($(this).prop("name")) % w] != -2) {
                 $(this).text("！");
                 caught++;
-                $("#left").text("Mines remaining: " + (m - caught));
-              } else if (tmp == "！") {
+              } else if (tmp == "！" && map[Math.floor(parseInt($(this).prop("name")) / w)][parseInt($(this).prop("name")) % w] != -1 && map[Math.floor(parseInt($(this).prop("name")) / w)][parseInt($(this).prop("name")) % w] != -2) {
                 $(this).text("　");
                 caught--;
-                $("#left").text("Mines remaining: " + (m - caught));
               }
+			  $("#left").text("Mines remaining: " + (m - caught));
             }
           )
           $(".click").on("click",
             function() {
-              var tmp = $(this).text();
-              if (tmp == "　" && map[Math.floor(parseInt($(this).prop("name")) / w + 1)][parseInt($(this).prop("name")) % w + 1] != -2) {
-                $('[name="' + ((Math.floor(parseInt($(this).prop("name")) / w + 1) - 1) * parseInt(w) + (parseInt($(this).prop("name")) % w + 1 - 1)) + '"]').css({
+			  tmp = this;
+			  if(first_click && map[Math.floor(parseInt($(this).prop("name")) / w)][parseInt($(this).prop("name")) % w] != -2) {
+			    start_time = new Date().getTime();
+			    start_timer();
+				first_click = false;
+			  }
+              tmp = $(this).text();
+              if (tmp == "　" && map[Math.floor(parseInt($(this).prop("name")) / w)][parseInt($(this).prop("name")) % w] != -2) { // can click
+                $('[name="' + ((Math.floor(parseInt($(this).prop("name")) / w)) * parseInt(w) + (parseInt($(this).prop("name")) % w)) + '"]').css({
                   "background-color": "gray",
                   "color": "white"
                 });
                 var tmp = this;
-                if (map[Math.floor(parseInt($(this).prop("name")) / w + 1)][parseInt($(this).prop("name")) % w + 1] == 9) {
+                if (map[Math.floor(parseInt($(this).prop("name")) / w)][parseInt($(this).prop("name")) % w] == 9) { // is mine
                   $(this).text("＊");
-                  $("h1").text("YOU LOSE!（σ°∀°）σ");
-                  for (i = 1; i <= l; ++i) {
-                    for (j = 1; j <= w; ++j) {
+                  for (i = 0; i < l; ++i) {
+                    for (j = 0; j < w; ++j) {
                       if (map[i][j] == 9) {
-                        $('[name="' + ((i - 1) * parseInt(w) + (j - 1)) + '"]').text("＊");
-                        $('[name="' + ((i - 1) * parseInt(w) + (j - 1)) + '"]').css("background-color", "gray");
+                        $('[name="' + (i * parseInt(w) + j) + '"]').text("＊");
+                        $('[name="' + (i * parseInt(w) + j) + '"]').css("background-color", "gray");
+				        $('[name="' + (i * parseInt(w) + j) + '"]').css("color", "black");
                       }
                     }
                   }
-                  for (i = 0; i <= l + 1; ++i) {
-                    for (j = 0; j <= w + 1; ++j) {
+				  $(this).css("color", "white");
+                  for (i = 0; i < l; ++i) {
+                    for (j = 0; j < w; ++j) {
                       map[i][j] = -2;
                     }
                   }
-                } else {
-                  if (map[Math.floor(parseInt($(this).prop("name")) / w + 1)][parseInt($(this).prop("name")) % w + 1] != 0 && map[Math.floor(parseInt($(this).prop("name")) / w + 1)][parseInt($(this).prop("name")) % w + 1] != -1) {
-                    $(this).text(map[Math.floor(parseInt($(this).prop("name")) / w + 1)][parseInt($(this).prop("name")) % w + 1]);
+				  stop_timer();
+				  $("h1").text("YOU LOSE!（σ°∀°）σ");
+                } else { // not mine
+                  if (map[Math.floor(parseInt($(this).prop("name")) / w)][parseInt($(this).prop("name")) % w] != 0 && map[Math.floor(parseInt($(this).prop("name")) / w)][parseInt($(this).prop("name")) % w] != -1) { // unopened number
+                    $(this).text(map[Math.floor(parseInt($(this).prop("name")) / w)][parseInt($(this).prop("name")) % w]);
                     opened++;
-                  } else {
-                    dfs((Math.floor(parseInt($(this).prop("name")) / w + 1)), (parseInt($(this).prop("name")) % w + 1));
+                  } else if (map[Math.floor(parseInt($(this).prop("name")) / w)][parseInt($(this).prop("name")) % w] == 0){// unopened blank
+                    dfs((Math.floor(parseInt($(this).prop("name")) / w)), (parseInt($(this).prop("name")) % w));
                   }
                   if (opened == (parseInt(l) * parseInt(w) - parseInt(m))) {
-                    for (i = 0; i <= l + 1; ++i) {
-                      for (j = 0; j <= w + 1; ++j) {
+                    for (i = 0; i < l; ++i) {
+                      for (j = 0; j < w; ++j) {
                         map[i][j] = -2;
                       }
                     }
+					stop_timer();
                     $("h1").text("YOU WIN!\\(^o^)/");
                   }
                 }
-
               }
             }
           );
@@ -230,10 +252,12 @@
     <input id="mine" value="99"></input>
     <button id="generate">Generate</button>
   </div>
+  </br>
+  <p id="time"></p>
+  <p id="left"></p>
   <div id="container">
   </div>
   </br>
-  <p id="left"></p>
   <h1></h1>
 </body>
 </html>
