@@ -27,6 +27,9 @@
     width: 36px;
     font-size: 24px;
   }
+  #time {
+    text-align: center;
+  }
   #left {
     text-align: center;
   }
@@ -38,6 +41,23 @@
   <script>
   $(
     function() { // 9 for mine, -2 for unclickable, -1 for opened, others for number of adjacent mines.
+	  var first_click = true;
+	  var start_time = -1;
+	  var end_time = -1;
+	  var set_time;
+	  function start_timer() { 
+	    set_time = setInterval(
+		  function() {
+			  end_time = new Date().getTime();
+			  $("#time").text("Time Spent: " + Math.floor((end_time - start_time) / 1000) + " s");
+		  }, 1000);
+	  }
+	  function stop_timer() {
+	    clearInterval(set_time);
+		first_click = true;
+	    start_time = -1;
+	    end_time = -1;
+	  }
       $("#generate").on("click",
         function() {
           function dfs(a, b) {
@@ -75,7 +95,6 @@
             }
             return;
           }
-		  
           function disableMenu(e) {
             e = e || window.event;
             if (e.button == 2) {
@@ -92,6 +111,7 @@
           var i, j;
           var caught = 0;
           var opened = 0;
+	      stop_timer();
           var l = $("#length").val();
           var w = $("#width").val();
           var m = $("#mine").val();
@@ -110,7 +130,8 @@
           }
           var map = new Array();
           $("#container").empty();
-          $("#left").text("Mines remaining: " + m);
+	      start = true;
+		  $("#left").text("Mines remaining: " + m);
           $("h1").text("");
           for (i = 0; i < l; ++i) { // initialize map
             map[i] = new Array();
@@ -118,7 +139,7 @@
               map[i][j] = 0;
             }
           }
-          $("#container").append("</br>");
+		  $("#time").text("Time Spent: 0 s");
           for (i = 0; i < l; ++i) { // generate board
             for (j = 0; j < w; ++j) {
               var b = $('<button class="board click" name="' + (i * parseInt(w) + j) + '">　</button>');
@@ -160,7 +181,13 @@
           )
           $(".click").on("click",
             function() {
-              var tmp = $(this).text();
+			  tmp = this;
+			  if(first_click && map[Math.floor(parseInt($(this).prop("name")) / w)][parseInt($(this).prop("name")) % w] != -2) {
+			    start_time = new Date().getTime();
+			    start_timer();
+				first_click = false;
+			  }
+              tmp = $(this).text();
               if (tmp == "　" && map[Math.floor(parseInt($(this).prop("name")) / w)][parseInt($(this).prop("name")) % w] != -2) { // can click
                 $('[name="' + ((Math.floor(parseInt($(this).prop("name")) / w)) * parseInt(w) + (parseInt($(this).prop("name")) % w)) + '"]').css({
                   "background-color": "gray",
@@ -169,7 +196,6 @@
                 var tmp = this;
                 if (map[Math.floor(parseInt($(this).prop("name")) / w)][parseInt($(this).prop("name")) % w] == 9) { // is mine
                   $(this).text("＊");
-                  $("h1").text("YOU LOSE!（σ°∀°）σ");
                   for (i = 0; i < l; ++i) {
                     for (j = 0; j < w; ++j) {
                       if (map[i][j] == 9) {
@@ -185,6 +211,8 @@
                       map[i][j] = -2;
                     }
                   }
+				  stop_timer();
+				  $("h1").text("YOU LOSE!（σ°∀°）σ");
                 } else { // not mine
                   if (map[Math.floor(parseInt($(this).prop("name")) / w)][parseInt($(this).prop("name")) % w] != 0 && map[Math.floor(parseInt($(this).prop("name")) / w)][parseInt($(this).prop("name")) % w] != -1) { // unopened number
                     $(this).text(map[Math.floor(parseInt($(this).prop("name")) / w)][parseInt($(this).prop("name")) % w]);
@@ -198,6 +226,7 @@
                         map[i][j] = -2;
                       }
                     }
+					stop_timer();
                     $("h1").text("YOU WIN!\\(^o^)/");
                   }
                 }
@@ -223,10 +252,12 @@
     <input id="mine" value="99"></input>
     <button id="generate">Generate</button>
   </div>
+  </br>
+  <p id="time"></p>
+  <p id="left"></p>
   <div id="container">
   </div>
   </br>
-  <p id="left"></p>
   <h1></h1>
 </body>
 </html>
